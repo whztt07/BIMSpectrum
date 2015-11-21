@@ -50,9 +50,6 @@ class BaseTestCase(TestCase):
     # db.drop_all()
         pass
 
-
-    # She needs to login at the homepage through stormpath.com
-
     # After authentication, she can then login his dropbox and choose a file from her dropbox folder
 
     # The file should be an IFC file

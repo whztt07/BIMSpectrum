@@ -34,6 +34,10 @@ class UserTestCase(BaseTestCase):
     def test_index(self):
         response = self.client.get('/', content_type='html/text')
         self.assertEqual(response.status_code, 200)
+        self.assertIn('Welcome', response.data)
+
+    # She needs to login at the homepage through stormpath.com
+
     #
     # # Ensure that main page requires user login
     # def test_main_route_requires_login(self):

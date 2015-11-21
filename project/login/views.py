@@ -23,22 +23,26 @@
 
 __author__ = 'ling'
 
-
-#################
-#### imports ####
-#################
-
-from flask import Flask
-import os
-
+from flask.ext.stormpath import StormpathManager
+from flask import Blueprint,render_template
+from project import app
 ################
 #### config ####
 ################
 
-app = Flask(__name__)
-app.config.from_object(os.environ['APP_SETTINGS'])
-from project.home.views import home_blueprint
-from project.login.views import login_blueprint
-# # register our blueprints
-app.register_blueprint(home_blueprint)
-app.register_blueprint(login_blueprint)
+login_blueprint = Blueprint(
+    'login', __name__,
+    template_folder='templates'
+)   # pragma: no cover
+
+stormpath_manager = StormpathManager()
+
+# some code which creates your app
+stormpath_manager.init_app(app)
+
+
+# use decorators to link the function to a url
+@login_blueprint.route('/welcome')   # pragma: no cover
+# @login_required
+def home():
+    return render_template('welcome.html')

@@ -29,7 +29,7 @@ __author__ = 'ling'
 #################
 
 from flask import render_template, Blueprint, request, flash, redirect, url_for
-
+from flask.ext.stormpath import login_required
 ################
 #### config ####
 ################
@@ -46,9 +46,10 @@ home_blueprint = Blueprint(
 
 # use decorators to link the function to a url
 @home_blueprint.route('/')   # pragma: no cover
+@login_required
 def home():
     # error = None
     # flash('New entry was successfully posted. Thanks.')
     # return render_template('welcome.html')  # render a template
     # return "lll"
-    return render_template('welcome.html')
+    return render_template('index.html')
