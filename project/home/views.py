@@ -46,10 +46,6 @@ home_blueprint = Blueprint(
 
 # use decorators to link the function to a url
 @home_blueprint.route('/')   # pragma: no cover
-@login_required
+@login_required # pragma: no cover 
 def home():
-    # error = None
-    # flash('New entry was successfully posted. Thanks.')
-    # return render_template('welcome.html')  # render a template
-    # return "lll"
     return render_template('index.html')

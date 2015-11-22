@@ -27,8 +27,6 @@ import os
 from flask.ext.testing import TestCase
 
 from project import app
-# from project.models import User, BlogPost
-
 
 class BaseTestCase(TestCase):
     """A base test case."""
@@ -38,26 +36,7 @@ class BaseTestCase(TestCase):
         return app
 
     def setUp(self):
-    # db.create_all()
-    # db.session.add(User("admin", "ad@min.com", "admin"))
-    # db.session.add(
-    #     BlogPost("Test post", "This is a test. Only a test.", "admin"))
-    # db.session.commit()
         pass
 
     def tearDown(self):
-    # db.session.remove()
-    # db.drop_all()
         pass
-
-    # After authentication, she can then login his dropbox and choose a file from her dropbox folder
-
-    # The file should be an IFC file
-
-    # The file will be uploaded to a DB hosted on mongoLab
-
-    # The file will be downloaded to the web service with a Base64 encoded filename
-
-    # The downloaded file then be parsed by ifcopenshell and be decomposed into entities and be sent to mongoDB
-
-    # The web service can delete the file if storage not permitted
