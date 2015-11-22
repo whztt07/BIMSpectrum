@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/lorinma/BIMSpectrum.png?label=ready&title=Ready)](https://waffle.io/lorinma/BIMSpectrum)
 # BIMSpectrum
 BIM Web App based on IFC
 
