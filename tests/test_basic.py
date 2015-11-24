@@ -34,7 +34,14 @@ class HomeTestCase(BaseTestCase):
     def test_index(self):
         response = self.client.get('/', content_type='html/text')
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Welcome', response.data)
+        self.assertIn('welcome', response.data)
+    
+    # don't know how to test this process
+    # # Ensure that one can download a file from given url and remove it
+    # # def test_upload(self):
+    # #     response = self.client.get('/upload', data=dict(url="http://www.buildingsmart-tech.org/ifc/IFC4/final/html/annex/annex-e/ifc/basic_shape_CSG.ifc",filename="Facade.ifc"), content_type='html/text')
+    # #     # self.assertIn(b'Facade.ifc',response.data)
+    # #     self.assertIn(b'ISO-10303-21',response.data)
 
 if __name__ == '__main__':
     unittest.main()

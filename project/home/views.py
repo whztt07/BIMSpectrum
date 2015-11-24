@@ -28,8 +28,12 @@ __author__ = 'ling'
 #### imports ####
 #################
 
-from flask import render_template, Blueprint, request, flash, redirect, url_for
-from flask.ext.stormpath import login_required
+from flask import render_template, Blueprint, request, flash, redirect, jsonify, url_for
+from flask.ext.stormpath import login_required,user
+import requests
+import os
+from project import app
+from base64 import b64encode
 ################
 #### config ####
 ################
@@ -48,4 +52,33 @@ home_blueprint = Blueprint(
 @home_blueprint.route('/')   # pragma: no cover
 @login_required # pragma: no cover 
 def home():
-    return render_template('index.html')
+    if app.config['TESTING'] == True:
+        email = "malingreal@gmail.com"
+        username = "Ling"
+    else:
+        email = user.email
+        username = user.given_name
+    r = requests.get(app.config['MONGODB_URL']+"/file?where=email=='"+email+"'")
+    return render_template('index.html', username=username, items=r.json(), db_url=app.config['MONGODB_URL'])
+    
+@home_blueprint.route('/upload')  # pragma: no cover
+@login_required  # pragma: no cover
+def upload():
+    if app.config['TESTING'] == True:
+        email = "malingreal@gmail.com"
+        username = "Ling"
+    else:
+        email = user.email
+        username = user.given_name
+    url = request.args.get('url')
+    url = url[:-1]+'1'
+    r = requests.get(url)
+    filename = request.args.get('filename')
+    path = os.path.join(app.config['APP_TEMP_FILE'], b64encode(filename)+".ifc")
+    with open(path, 'wb') as f:
+        f.write(r.content)
+    r = requests.post(app.config['MONGODB_URL']+"/file", data = {"username":username , "filename":filename, "email":email})
+    response_data=r.json()
+    os.remove(path)
+    return jsonify(filename=filename,fileid=response_data['_id'])
+    
