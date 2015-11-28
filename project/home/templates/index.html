@@ -20,18 +20,20 @@ $(document).ready(function(){
             // alert("Here's the file link: " + files[0].link)
             var dataToSend = {
                 url:files[0].link,
-                filename:files[0].name
+                filename:files[0].name,
+                project_id:"{{ project_id }}"
             };
             document.getElementById("upload-notice").innerHTML="<font color='red'>I'm working hard on your model!</font>";
             $.getJSON($SCRIPT_ROOT + '/upload', dataToSend,
                 function(data) {
-                    url =  "{{ db_url }}/entity/"+data.fileid;
+                    url =  "{{ db_url }}/entity?file_id='"+data.file_id+"'";
                     document.getElementById("upload-notice").innerHTML="Parsing complete!";
                     info = document.createElement("font");
                     info.innerText="New file:";
                     info.color='red';
                     link = document.createElement("a");
-                    link.href = url
+                    link.href = url;
+                    link.target='_blank';
                     link.innerText=data.filename;
                     $("#new-files").append(info,link,"was added");
                 }
@@ -67,7 +69,7 @@ $(document).ready(function(){
 <table>
 {% for item in items._items %}
     <tr>
-        <td><a href="{{ db_url }}/entity/{{ item._id }}" target="_blank">{{ item.filename }}</a>
+        <td><a href="{{ db_url }}/entity?file_id=='{{ item._id }}'" target="_blank">{{ item.filename }}</a>
         </td>
     </tr>
 {% endfor %}
