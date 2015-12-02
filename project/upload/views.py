@@ -26,6 +26,8 @@ __author__ = 'ling'
 from flask import Blueprint, request, jsonify
 from project import app
 import requests
+import os
+from bson.objectid import ObjectId
 
 from pymongo import MongoClient
 client = MongoClient(host=app.config['MONGODB_HOST'], port=int(app.config['MONGODB_PORT']))
@@ -50,7 +52,6 @@ def parse_ifc(path,additional_data):
     num=file.wrapped_data.entity_names()
     data=list()
     for i in num:
-        from bson.objectid import ObjectId
         entity = file.wrapped_data.by_id(i)
         entity_data = {"line_id":entity.id(),"_id":ObjectId(),"type": entity.is_a(),"content": entity.__str__()}
         entity_data = {**entity_data,**additional_data}
@@ -99,32 +100,27 @@ def parse_ifc(path,additional_data):
 @upload_blueprint.route('/upload')
 # @login_required  # pragma: no cover
 def upload():
-    from bson.objectid import ObjectId
     project_id=ObjectId(request.args.get('project_id'))
     filename = request.args.get('filename')
-    # file_id=db.entity.insert_one({"project_id":project_id,"filename":filename}).inserted_id
+    file_id=db.file.insert_one({"project_id":project_id,"filename":filename}).inserted_id
+    
+    # save file to web server
+    url = request.args.get('url')
+    url = url[:-1]+'1'
+    path = os.path.join(app.config['APP_TEMP_FILE'], str(ObjectId())+".ifc")
+    save_file(url,path)
+    
+    # post entities to mongodb
+    data=parse_ifc(path,{'project_id':project_id,'file_id':file_id})
+    db.entity.insert_many(data)
     #
-    # # headers = {'Content-Type': 'application/json'}
-    # # # save file to web server
-    # # url = request.args.get('url')
-    # # url = url[:-1]+'1'
-    # # path = os.path.join(app.config['APP_TEMP_FILE'], b64encode(filename)+".ifc")
-    # # save_file(url,filename)
+    # # #### test ####
+    # #     response_data=r.json()
+    # #     return json.dumps(response_data)
+    # # #### test ####
     #
-    # #
-    # # # post entities to mongodb
-    # # data=parse_ifc(path,{'project_id':project_id,'file_id':file_id})
-    # # db.entity.insert_many(data)
-    # #
-    # # # #### test ####
-    # # #     response_data=r.json()
-    # # #     return json.dumps(response_data)
-    # # # #### test ####
-    # #
-    # # os.remove(path)
-    # return jsonify(filename=filename,file_id=str(file_id))
-    return jsonify(filename=filename)
-    # return "OK"
+    os.remove(path)
+    return jsonify(filename=filename,file_id=str(file_id))
 
 # if you are going to fetch repeatedly from name, you better construct a dictionary with the names as keys so get operations are O(1)
 def build_dict(seq, key):

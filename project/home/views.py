@@ -33,7 +33,6 @@ home_blueprint = Blueprint(
     template_folder='templates'
 )
 
-
 # use decorators to link the function to a url
 @home_blueprint.route('/')
 # @login_required # pragma: no cover 
