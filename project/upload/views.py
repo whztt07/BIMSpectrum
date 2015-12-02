@@ -54,7 +54,7 @@ def parse_ifc(path,additional_data):
     for i in num:
         entity = file.wrapped_data.by_id(i)
         entity_data = {"line_id":entity.id(),"_id":ObjectId(),"type": entity.is_a(),"content": entity.__str__()}
-        entity_data = {**entity_data,**additional_data}
+        entity_data.update(additional_data)
         data.append(entity_data)
     data_indexed=build_dict(data,key="line_id")
     inx=0
