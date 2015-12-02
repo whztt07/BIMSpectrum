@@ -66,6 +66,7 @@ def home():
 ################
 #### test ####
 ################
+#TODO this version we assume each user has only one project
     project_id = ""
     r = requests.get(app.config['MONGODB_URL']+"/project?user_id="+user_id)
     project_items=r.json()
@@ -86,35 +87,24 @@ def home():
 @login_required  # pragma: no cover
 def upload():
     headers = {'Content-Type': 'application/json'}
-    project_id="5658757ad737bd5ec6b49832"
-        
-################
-#### test ####
-################
     project_id = request.args.get('project_id')
     url = request.args.get('url')
     url = url[:-1]+'1'
     r = requests.get(url)
     filename = request.args.get('filename')
+################
+#### test ####
+################
+#TODO Heroku doesn't allow store file on server?
     path = os.path.join(app.config['APP_TEMP_FILE'], b64encode(filename)+".ifc")
     with open(path, 'wb') as f:
         f.write(r.content)
-    
-#### test ####
-    # filename = "test.ifc"
-    # path = os.path.join(app.config['APP_TEMP_FILE'], "test.ifc")
-#### test ####
-
 ################
 #### test ####
 ################
     r = requests.post(app.config['MONGODB_URL']+"/file", data = {"project_id":project_id , "filename":filename})
     response_data=r.json()
     file_id=response_data['_id']
-    
-#### test ####
-    # file_id = "5654bfa9d737bd7e94b37e6c"
-#### test ####
     
     file = ifc.open(path)
     # get all the entities line_ids

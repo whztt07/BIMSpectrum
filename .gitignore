@@ -1,5 +1,6 @@
 coverage
-.ipny
+*.ipn*
+*.zip
 
 .idea/
 .c9/
