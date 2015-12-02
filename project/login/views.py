@@ -24,16 +24,13 @@
 __author__ = 'ling'
 
 from flask.ext.stormpath import StormpathManager
-from flask import Blueprint,render_template
+from flask import Blueprint, render_template
 from project import app
-################
-#### config ####
-################
 
 login_blueprint = Blueprint(
     'login', __name__,
     template_folder='templates'
-)   # pragma: no cover
+)
 
 stormpath_manager = StormpathManager()
 
@@ -42,7 +39,7 @@ stormpath_manager.init_app(app)
 
 
 # use decorators to link the function to a url
-@login_blueprint.route('/welcome')   # pragma: no cover
+@login_blueprint.route('/welcome')  # pragma: no cover
 # @login_required
 def home():
     return render_template('welcome.html')

@@ -23,29 +23,19 @@
 
 __author__ = 'ling'
 
-
-#################
-#### imports ####
-#################
-
-from flask import Blueprint, request, redirect, jsonify, url_for
-from flask.ext.stormpath import login_required,user
-import requests
-import os,json
+from flask import Blueprint, request, jsonify
 from project import app
-from base64 import b64encode
-from project import ifcopenshell as ifc
+import requests
 
-import pymongo
 from pymongo import MongoClient
-client = MongoClient(host='ds055872.mongolab.com', port=55872)
+client = MongoClient(host=app.config['MONGODB_HOST'], port=int(app.config['MONGODB_PORT']))
 db = client.ifc
-db.authenticate("lorinma", "4GqUynt2")
+db.authenticate(app.config['MONGODB_USER'], app.config['MONGODB_KEY'])
 
-home_blueprint = Blueprint(
+upload_blueprint = Blueprint(
     'upload', __name__,
     template_folder='templates'
-)   # pragma: no cover
+)
 
 #TODO Heroku doesn't allow store file on server?
 def save_file(url,path):
@@ -55,7 +45,7 @@ def save_file(url,path):
 
 # parse ifc file get all the data
 def parse_ifc(path,additional_data):
-    import ifcopenshell as ifc
+    import project.ifcopenshell as ifc
     file = ifc.open(path)
     num=file.wrapped_data.entity_names()
     data=list()
@@ -95,7 +85,7 @@ def parse_ifc(path,additional_data):
         data[inx]["include"]=list()
         # this will include all the entities that direct/indirect used for it
         for include in include_list:
-    # some traverse result may include some value like IfcMassMeasure(0.) which is just a subclass of real and has no line_id
+            # some traverse result may include some value like IfcMassMeasure(0.) which is just a subclass of real and has no line_id
             try:
                 line_id=include.id()
                 if line_id!=i:
@@ -104,35 +94,37 @@ def parse_ifc(path,additional_data):
                 pass
         inx+=1
     return data
-    
+
 # use decorators to link the function to a url
-@home_blueprint.route('/upload')  # pragma: no cover
-@login_required  # pragma: no cover
+@upload_blueprint.route('/upload')
+# @login_required  # pragma: no cover
 def upload():
-    headers = {'Content-Type': 'application/json'}
-    
-    # save file to web server
-    url = request.args.get('url')
-    url = url[:-1]+'1'
-    filename = request.args.get('filename')
-    path = os.path.join(app.config['APP_TEMP_FILE'], b64encode(filename)+".ifc")
-    save_file(url,filename)
-    
     from bson.objectid import ObjectId
     project_id=ObjectId(request.args.get('project_id'))
-    file_id=db.entity.insert_one({"project_id":project_id,"filename":filename}).inserted_id
-    
-    # post entities to mongodb
-    data=parse_ifc(path,{'project_id':project_id,'file_id':file_id})
-    db.entity.insert_many(data)
-    
-# #### test ####
-#     response_data=r.json()
-#     return json.dumps(response_data)
-# #### test ####
-
-    os.remove(path)
-    return jsonify(filename=filename,file_id=str(file_id))
+    filename = request.args.get('filename')
+    # file_id=db.entity.insert_one({"project_id":project_id,"filename":filename}).inserted_id
+    #
+    # # headers = {'Content-Type': 'application/json'}
+    # # # save file to web server
+    # # url = request.args.get('url')
+    # # url = url[:-1]+'1'
+    # # path = os.path.join(app.config['APP_TEMP_FILE'], b64encode(filename)+".ifc")
+    # # save_file(url,filename)
+    #
+    # #
+    # # # post entities to mongodb
+    # # data=parse_ifc(path,{'project_id':project_id,'file_id':file_id})
+    # # db.entity.insert_many(data)
+    # #
+    # # # #### test ####
+    # # #     response_data=r.json()
+    # # #     return json.dumps(response_data)
+    # # # #### test ####
+    # #
+    # # os.remove(path)
+    # return jsonify(filename=filename,file_id=str(file_id))
+    return jsonify(filename=filename)
+    # return "OK"
 
 # if you are going to fetch repeatedly from name, you better construct a dictionary with the names as keys so get operations are O(1)
 def build_dict(seq, key):

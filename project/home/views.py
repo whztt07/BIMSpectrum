@@ -23,65 +23,47 @@
 
 __author__ = 'ling'
 
-
-#################
-#### imports ####
-#################
-
-from flask import render_template, Blueprint, request, flash, redirect, jsonify, url_for
-# from flask.ext.stormpath import login_required,user
-import requests
-import os,json
+from flask import Blueprint, render_template
 from project import app
-from base64 import b64encode
-from project import ifcopenshell as ifc
-################
-#### config ####
-################
+import requests
+import json
 
 home_blueprint = Blueprint(
     'home', __name__,
     template_folder='templates'
-)   # pragma: no cover
+)
 
-
-################
-#### routes ####
-################
 
 # use decorators to link the function to a url
-@home_blueprint.route('/')   # pragma: no cover
+@home_blueprint.route('/')
 # @login_required # pragma: no cover 
 def home():
-    if app.config['TESTING'] == True:
+    if app.config['TESTING']:
         user_id = "abcdef"
-        username = "lorinma"
+        username = "Ling"
         email = "malingreal@gmail.com"
     else:
         user_id = "abcdef"
-        username = "lorinma"
+        username = "Ling"
         email = "malingreal@gmail.com"
         # username = user.given_name
         # email = user.email
         # user_id = user.get_id()[-22:]
     description = "test"
-    
-################
-#### test ####
-################
-#TODO this version we assume each user has only one project
+
+    # #TODO this version we assume each user has only one project
     project_id = ""
-    r = requests.get(app.config['MONGODB_URL']+"/project?user_id="+user_id)
-    project_items=r.json()
-    if len(project_items['_items'])==0:
-        r = requests.post(app.config['MONGODB_URL']+"/project", data = {"username":username,"email":email,"user_id":user_id,"description":description})
-        project_items=r.json()
-        project_id=project_items["_id"]
+    r = requests.get(app.config['API_URL'] + "/project?user_id=" + user_id)
+    project_items = r.json()
+    if len(project_items['_items']) == 0:
+        r = requests.post(app.config['API_URL'] + "/project",
+                          data={"username": username, "email": email, "user_id": user_id, "description": description})
+        project_items = r.json()
+        project_id = project_items["_id"]
     else:
         project_info = project_items['_items'][0]
-        project_id =  project_info['_id']
-################
-#### test ####
-################
-    r = requests.get(app.config['MONGODB_URL']+"/file?project_id="+project_id)
-    return render_template('index.html', username=username, project_id=project_id, items=r.json(), db_url=app.config['MONGODB_URL'])
+        project_id = project_info['_id']
+    r = requests.get(app.config['API_URL'] + "/file?project_id=" + project_id)
+    # return json.dumps(r.json())
+    return render_template('index.html', username=username, project_id=project_id, items=r.json(),
+                           api_url=app.config['API_URL'])
