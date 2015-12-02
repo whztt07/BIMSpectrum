@@ -1,5 +1,3 @@
-Flask-Script
-Flask-Stormpath
-Flask-Testing
+Flask-PyMongo
 gunicorn
-pymongo
+
