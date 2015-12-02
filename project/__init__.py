@@ -38,8 +38,10 @@ import os
 app = Flask(__name__)
 app.config.from_object(os.environ['APP_SETTINGS'])
 from project.home.views import home_blueprint
-from project.login.views import login_blueprint
+# from project.login.views import login_blueprint
+# from project.upload.views import upload_blueprint
 
 # # register our blueprints
 app.register_blueprint(home_blueprint)
-app.register_blueprint(login_blueprint)
+# app.register_blueprint(login_blueprint)
+# app.register_blueprint(upload_blueprint)

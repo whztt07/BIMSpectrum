@@ -33,8 +33,6 @@ class BaseConfig(object):
     }
     TESTING = True
 
-
-
 class TestConfig(BaseConfig):
     DEBUG = True
 
