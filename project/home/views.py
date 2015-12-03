@@ -23,40 +23,47 @@
 
 __author__ = 'ling'
 
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, session, redirect
 from project import app
 import requests
 import json
+from functools import wraps
 
 home_blueprint = Blueprint(
     'home', __name__,
     template_folder='templates'
 )
 
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'profile' not in session:
+            # Redirect to Login page here
+            return redirect('/login')
+        return f(*args, **kwargs)
+    return decorated
+    
 # use decorators to link the function to a url
 @home_blueprint.route('/')
-# @login_required # pragma: no cover 
+@requires_auth
 def home():
-    if app.config['TESTING']:
-        user_id = "abcdef"
-        username = "Ling"
-        email = "malingreal@gmail.com"
-    else:
-        user_id = "abcdef"
-        username = "Ling"
-        email = "malingreal@gmail.com"
-        # username = user.given_name
-        # email = user.email
-        # user_id = user.get_id()[-22:]
-    description = "test"
+    user=session['profile']
+    user_id = user['user_id']
+    given_name=""
+    if "given_name" in user:
+        given_name = user['given_name']
+    email = ""
+    if "email" in user:
+        email = user['email']
 
     # #TODO this version we assume each user has only one project
     project_id = ""
+    project_description="test"
     r = requests.get(app.config['API_URL'] + "/project?user_id=" + user_id)
     project_items = r.json()
     if len(project_items['_items']) == 0:
         r = requests.post(app.config['API_URL'] + "/project",
-                          data={"username": username, "email": email, "user_id": user_id, "description": description})
+                          data={"username": given_name, "email": email, "user_id": user_id, "description": project_description})
         project_items = r.json()
         project_id = project_items["_id"]
     else:
@@ -64,5 +71,5 @@ def home():
         project_id = project_info['_id']
     r = requests.get(app.config['API_URL'] + "/file?project_id=" + project_id)
     # return json.dumps(r.json())
-    return render_template('index.html', username=username, project_id=project_id, items=r.json(),
+    return render_template('index.html', user=user, project_id=project_id, items=r.json(),
                            api_url=app.config['API_URL'])
