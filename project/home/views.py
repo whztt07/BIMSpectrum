@@ -72,5 +72,5 @@ def home():
         project_id = project_info['_id']
     r = requests.get(app.config['API_URL'] + '/file?where={"project_id": "'+project_id+'"}')
     # return json.dumps(r.json())
-    return render_template('index.html', user=user, project_id=project_id, items=r.json(),
-                           api_url=app.config['API_URL'])
+    return render_template('index.html',given_name=given_name, project_id=project_id, items=r.json(),
+                          api_url=app.config['API_URL'])
