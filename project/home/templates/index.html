@@ -23,7 +23,7 @@
                     document.getElementById("upload-notice").innerHTML="<font color='red'>I'm working hard on your model!</font>";
                     $.getJSON($SCRIPT_ROOT + '/upload', dataToSend,
                             function(data) {
-                                url =  "{{ api_url }}/entity??where={'file_id':'"+data.file_id+"'}";
+                                url =  '{{ api_url }}/entity?where={"file_id":"'+data.file_id+'"}';
                                 document.getElementById("upload-notice").innerHTML="Parsing complete!";
                                 info = document.createElement("font");
                                 info.innerText="New file:";
