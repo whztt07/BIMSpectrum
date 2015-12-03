@@ -48,6 +48,7 @@ def requires_auth(f):
 @requires_auth
 def home():
     user=session['profile']
+    print(session)
     user_id = user['user_id']
     given_name=""
     if "given_name" in user:
@@ -59,7 +60,7 @@ def home():
     # #TODO this version we assume each user has only one project
     project_id = ""
     project_description="test"
-    r = requests.get(app.config['API_URL'] + "/project?user_id=" + user_id)
+    r = requests.get(app.config['API_URL'] + '/project?where={"user_id": "'+user_id+'"}')
     project_items = r.json()
     if len(project_items['_items']) == 0:
         r = requests.post(app.config['API_URL'] + "/project",
@@ -69,7 +70,7 @@ def home():
     else:
         project_info = project_items['_items'][0]
         project_id = project_info['_id']
-    r = requests.get(app.config['API_URL'] + "/file?project_id=" + project_id)
+    r = requests.get(app.config['API_URL'] + '/file?where={"project_id": "'+project_id+'"}')
     # return json.dumps(r.json())
     return render_template('index.html', user=user, project_id=project_id, items=r.json(),
                            api_url=app.config['API_URL'])
