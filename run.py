@@ -5,5 +5,5 @@ if __name__ == '__main__':
     
     # # particularly for cloud 9 use
     # import os
-    # app.run(host=os.environ['IP'],port=8081)
+    # app.run(host=os.environ['IP'],port=int(os.environ['PORT']),debug=True)
     
