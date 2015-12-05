@@ -40,6 +40,8 @@ from flask import Flask, request, jsonify, session, redirect, render_template, s
 # Here we're using the /callback route.
 @auth0_blueprint.route('/callback')
 def callback_handling():
+  if app.config['TESTING']:
+    return redirect('/')
   code = request.args.get('code')
 
   json_header = {'content-type': 'application/json'}
@@ -72,6 +74,8 @@ def callback_handling():
 # Controllers API
 @auth0_blueprint.route("/login")
 def login():
+  if app.config['TESTING']:
+    return redirect('/')
   env = {
     'client_id':     app.config['AUTH0_CLIENT_ID'],
     'client_secret': app.config['AUTH0_CLIENT_SECRET'],
@@ -82,6 +86,8 @@ def login():
   
 @auth0_blueprint.route("/logout")
 def logout():
+  if app.config['TESTING']:
+    return redirect('/')
   session.clear()
   requests.get("https://"+app.config['AUTH0_DOMAIN']+"/v2/logout")
   return redirect('/login')
