@@ -53,7 +53,7 @@ def home():
     if app.config['TESTING']:
         user = {"user_id":"abcdefg","given_name":"Ling","email":"malingreal@gmail.com"}
     else:
-        print(session)
+        # print(session)
         user=session['profile']
     user_id = user['user_id']
     given_name=""

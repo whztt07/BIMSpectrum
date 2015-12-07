@@ -94,7 +94,23 @@ def parse_ifc(path,additional_data):
             except:
                 pass
         inx+=1
-    return data
+    elements=file.by_type("IfcBuildingElement")
+    geom_data=list()
+    import project.ifcopenshell.geom as geom
+    settings = geom.settings()
+    settings.set(settings.USE_BREP_DATA, True)
+    for element in elements:   
+        g_data=dict()
+        try:
+            obj = geom.create_shape(settings, element)
+            shape = obj.geometry
+            g_data['entity_id']=data_indexed[element.id()]['_id']
+            g_data['occ_brep']=shape.brep_data
+            g_data.update(additional_data)
+            geom_data.append(g_data)
+        except:
+            pass
+    return (data,geom_data)
 
 # use decorators to link the function to a url
 @upload_blueprint.route('/upload')
@@ -111,8 +127,9 @@ def upload():
     save_file(url,path)
     
     # post entities to mongodb
-    data=parse_ifc(path,{'project_id':project_id,'file_id':file_id})
+    data,geom_data=parse_ifc(path,{'project_id':project_id,'file_id':file_id})
     db.entity.insert_many(data)
+    db.geometry.insert_many(geom_data)
     #
     # # #### test ####
     # #     response_data=r.json()
