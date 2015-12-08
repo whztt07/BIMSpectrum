@@ -23,7 +23,7 @@
                     document.getElementById("upload-notice").innerHTML="<font color='red'>I'm working hard on your model!</font>";
                     $.getJSON($SCRIPT_ROOT + '/upload', dataToSend,
                             function(data) {
-                                url =  '{{ api_url }}/entity?where={"file_id":"'+data.file_id+'"}';
+                                url =  'http://restfulifc.herokuapp.com/entity?where={"file_id":"'+data.file_id+'"}';
                                 document.getElementById("upload-notice").innerHTML="Parsing complete!";
                                 info = document.createElement("font");
                                 info.innerText="New file:";
@@ -66,7 +66,7 @@
     <table>
         {% for item in items._items %}
             <tr>
-                <td><a href='{{ api_url }}/entity?where={"file_id":"{{ item._id }}"}' target="_blank">{{ item.filename }}</a>
+                <td><a href='http://restfulifc.herokuapp.com/entity?where={"file_id":"{{ item._id }}"}' target="_blank">{{ item.filename }}</a>
                 </td>
             </tr>
         {% endfor %}

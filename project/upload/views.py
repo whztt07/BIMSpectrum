@@ -28,6 +28,8 @@ from project import app
 import requests
 import os
 from bson.objectid import ObjectId
+import project.ifcopenshell as ifc
+import project.ifcopenshell.geom as geom
 
 from pymongo import MongoClient
 client = MongoClient(host=app.config['MONGODB_HOST'], port=int(app.config['MONGODB_PORT']))
@@ -47,56 +49,77 @@ def save_file(url,path):
 
 # parse ifc file get all the data
 def parse_ifc(path,additional_data):
-    import project.ifcopenshell as ifc
     file = ifc.open(path)
-    num=file.wrapped_data.entity_names()
+    line_ids=file.wrapped_data.entity_names()
     data=list()
-    for i in num:
-        entity = file.wrapped_data.by_id(i)
+    for line_id in line_ids:
+        entity = file.wrapped_data.by_id(line_id)
         entity_data = {"line_id":entity.id(),"_id":ObjectId(),"type": entity.is_a(),"content": entity.__str__()}
         entity_data.update(additional_data)
         data.append(entity_data)
     data_indexed=build_dict(data,key="line_id")
     inx=0
-    for i in num:
-        entity = file.wrapped_data.by_id(i)
-        for j in range(entity.__len__()):
-            attribute_name=entity.get_argument_name(j)
-            attribute_value=entity.get_argument(j)
+    for line_id in line_ids:
+        entity = file.wrapped_data.by_id(line_id)  
+        for attribute_name in entity.get_attribute_names():
+            attribute_value=entity.get_argument(attribute_name)   
             try:
-                line_id=attribute_value.id()
-                if line_id==0:
+                a_line_id=attribute_value.id()
+                if a_line_id==0:
                     # some value like IfcMassMeasure(0.), will give id=0, and need to extract the real value
                     data[inx][attribute_name]=attribute_value.get_argument(0)
                 else:
-                    data[inx][attribute_name]=data_indexed[line_id]["_id"]
+                    data[inx][attribute_name]=data_indexed[a_line_id]["_id"]
             except:
                 import types
-                if isinstance(attribute_value, list):
+                if isinstance(attribute_value, tuple):
                     data[inx][attribute_name]=list()
                     for v in attribute_value:
                         try:
-                            line_id=v.id()
-                            data[inx][attribute_name].append(data_indexed[line_id]["_id"])
+                            a_line_id=v.id()
+                            data[inx][attribute_name].append(data_indexed[a_line_id]["_id"])
+                        except:
+                            data[inx][attribute_name].append(v)
+                else:
+                    data[inx][attribute_name]=attribute_value
+        for attribute_name in entity.get_inverse_attribute_names():
+            attribute_value=entity.get_inverse(attribute_name)
+            if not attribute_value:
+                continue
+            try:
+                a_line_id=attribute_value.id()
+                if a_line_id==0:
+                    # some value like IfcMassMeasure(0.), will give id=0, and need to extract the real value
+                    data[inx][attribute_name]=attribute_value.get_argument(0)
+                else:
+                    data[inx][attribute_name]=data_indexed[a_line_id]["_id"]
+            except:
+                import types
+                if isinstance(attribute_value, tuple):
+                    data[inx][attribute_name]=list()
+                    for v in attribute_value:
+                        try:
+                            a_line_id=v.id()
+                            data[inx][attribute_name].append(data_indexed[a_line_id]["_id"])
                         except:
                             data[inx][attribute_name].append(v)
                 else:
                     data[inx][attribute_name]=attribute_value
         include_list=file.wrapped_data.traverse(entity)
-        data[inx]["include"]=list()
-        # this will include all the entities that direct/indirect used for it
-        for include in include_list:
-            # some traverse result may include some value like IfcMassMeasure(0.) which is just a subclass of real and has no line_id
-            try:
-                line_id=include.id()
-                if line_id!=i:
-                    data[inx]["include"].append(data_indexed[line_id]["_id"])
-            except:
-                pass
+        if len(include_list)>1:
+            data[inx]["include"]=list()
+            # this will include all the entities that direct/indirect used for it
+            for include in include_list:
+                # some traverse result may include some value like IfcMassMeasure(0.) which is just a subclass of real and has no line_id
+                try:
+                    a_line_id=include.id()
+                    if a_line_id!=line_id:
+                        data[inx]["include"].append(data_indexed[a_line_id]["_id"])
+                except:
+                    pass
         inx+=1
     elements=file.by_type("IfcBuildingElement")
     geom_data=list()
-    import project.ifcopenshell.geom as geom
     settings = geom.settings()
     settings.set(settings.USE_BREP_DATA, True)
     for element in elements:   

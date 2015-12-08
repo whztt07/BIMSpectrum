@@ -33,8 +33,8 @@ from project.upload.views import upload_blueprint
 app.register_blueprint(upload_blueprint)
 from project.auth0.views import auth0_blueprint
 app.register_blueprint(auth0_blueprint)
-
-
+# from project.viewer.views import viewer_blueprint
+# app.register_blueprint(viewer_blueprint)
 
 
 # from project.login.views import login_blueprint

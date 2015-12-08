@@ -1,4 +1,7 @@
 *.ipy*
+Ifc*/
+oce*/
+pythonocc*/
 *.zip
 
 .idea/
